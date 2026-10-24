@@ -2,7 +2,7 @@
 
 **Brain MRI Research Classification Dashboard**
 
-OncoLens is a Biomedical Engineering portfolio project by **Pradipta Dolai** ([pradiptadolaii](https://github.com/pradiptadolaii)). It demonstrates a browser dashboard integrated with a FastAPI backend and a four-output PyTorch ResNet18 classifier.
+OncoLens is a Biomedical Engineering project by **Pradipta Dolai** ([pradiptadolaii](https://github.com/pradiptadolaii)). It demonstrates a browser dashboard integrated with a FastAPI backend and a four-output PyTorch ResNet18 classifier.
 
 > **Research and education only. This is an experimental prototype, not a clinically validated medical diagnostic system. Do not use it for diagnosis, treatment, or patient care.**
 
