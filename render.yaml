@@ -1,11 +1,9 @@
-# REVIEW ONLY: standard is paid. Do not create this service without cost approval.
-# Deployment is blocked until the authorized checkpoint is supplied to the build
-# and the public-access safeguards described in RENDER_DEPLOYMENT.md are resolved.
+# Paid proposal only. Creation requires the owner's explicit cost approval.
 services:
   - type: web
     runtime: python
     name: oncolens-research
-    plan: standard
+    plan: 1c-2g
     autoDeployTrigger: "off"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
@@ -19,3 +17,11 @@ services:
         value: "1"
       - key: MKL_NUM_THREADS
         value: "1"
+      - key: UVICORN_ACCESS_LOG
+        value: "false"
+      - key: ONCOLENS_MAX_IMAGE_PIXELS
+        value: "4000000"
+      - key: ONCOLENS_USERNAME
+        value: researcher
+      - key: ONCOLENS_PASSWORD
+        sync: false

@@ -102,3 +102,9 @@ See [RESEARCH_DISCLAIMER.md](RESEARCH_DISCLAIMER.md). No model performance metri
 **Pradipta Dolai** - Biomedical Engineering  - OncoLens research prototype.
 
 Application and prediction logic are preserved from the supplied working project. Publication adds documentation and CI. No software or model redistribution license has been inferred or granted by publication.
+
+## Render deployment branch
+
+The deployment configuration and security controls are described in [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md). This version requires ONCOLENS_USERNAME and an ONCOLENS_PASSWORD of at least 20 characters in environment secrets before startup, including for local use. The dashboard design and inference math are preserved. Cloud uploads use a 4-million-pixel cap, memory-only parsing, one active prediction, and global rate limits. The public health endpoint is separate from authenticated dashboard and prediction routes.
+
+The model stays out of this public source repository. A private deployment mirror can supply exact binary model parts through Render's GitHub integration, or an operator can configure an authorized private artifact URL. Startup verifies the original SHA-256. The paid 2 GB Blueprint is a proposal and must not be created before explicit cost approval.
