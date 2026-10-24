@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OncoLens — Research Pipeline Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Latin+Modern+Roman:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eeede8;--pn:#fffefa;--pn2:#e8e6df;--bd:#c9c6bc;--tx:#1B1E4A;--dm:#66665f;--cy:#1B1E4A;--am:#956c28;--rd:#a03b47;--gr:#386c5c;--sh:0 1px 3px #1b1e4a12,0 8px 28px #1b1e4a12;--sans:"CMU Serif","Computer Modern Serif","Latin Modern Roman",Georgia,serif;--mono:"CMU Serif","Computer Modern Serif","Latin Modern Roman",Georgia,serif}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151735;--pn:#1B1E4A;--pn2:#272b59;--bd:#51546c;--tx:#f4f1e9;--dm:#c2c0b8;--cy:#AFAEA2;--am:#e2c28c;--rd:#ff8f9b;--gr:#9cdbc2;--sh:0 8px 24px #0005}}
+:root[data-theme=dark]{--bg:#151735;--pn:#1B1E4A;--pn2:#272b59;--bd:#51546c;--tx:#f4f1e9;--dm:#c2c0b8;--cy:#AFAEA2;--am:#e2c28c;--rd:#ff8f9b;--gr:#9cdbc2;--sh:0 8px 24px #0005}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--tx);font:14px/1.45 var(--sans);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--pn);border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0);z-index:5}
+.brand{font-weight:700;font-size:18px;letter-spacing:.05em}.brand b{color:var(--cy)}.brand small{display:block;font:400 10px var(--mono);color:var(--dm);letter-spacing:.08em}
+.chip{font:600 10px var(--mono);padding:4px 10px;border:1px solid var(--bd);border-radius:20px;color:var(--dm);background:var(--pn2)}
+.note{background:#c77d0a14;border-bottom:1px solid #c77d0a33;color:var(--am);font-size:12px;padding:8px 24px;text-align:center}
+.wrap{max-width:1280px;margin:auto;padding:22px 24px 50px}
+.stepper{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.st{background:var(--pn);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:.3s}
+.st small{font:10px var(--mono);color:var(--dm)}.st div{font-weight:600;margin-top:2px;color:var(--dm)}.st em{font:10px var(--mono);color:var(--dm);font-style:normal}
+.st.on{border-color:var(--cy)}.st.on div{color:var(--cy)}.st.on:after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--cy);animation:ld 1s ease-in-out infinite alternate;transform-origin:left}
+.st.ok div{color:var(--tx)}.st.ok small{color:var(--gr)}@keyframes ld{from{transform:scaleX(.1)}to{transform:scaleX(1)}}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px}.col{display:flex;flex-direction:column;gap:18px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--pn);border:1px solid var(--bd);border-radius:14px;padding:16px;box-shadow:var(--sh)}
+.card h3{margin:0 0 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.card h3 i{font:600 9.5px var(--mono);font-style:normal;padding:2px 8px;border-radius:20px;border:1px solid var(--bd);color:var(--dm)}
+.card h3 i.a{color:var(--am);border-color:var(--am)}.card h3 i.g{color:var(--gr);border-color:var(--gr)}.card h3 i.r{color:var(--rd);border-color:var(--rd)}
+.ph{font:12px var(--mono);color:var(--dm);text-align:center;padding:18px;border:1px dashed var(--bd);border-radius:10px}
+.view{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:1}canvas{display:block;width:100%}#cv{height:100%}
+.vt{position:absolute;top:8px;left:8px;font:10px var(--mono);color:#3fe0c5;background:#000a;padding:3px 8px;border-radius:5px}
+.drop{aspect-ratio:1;border:1.5px dashed var(--bd);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--dm);cursor:pointer;text-align:center;font-size:13px;transition:.2s}.drop:hover,.drop.h{border-color:var(--cy);color:var(--tx)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:600 12px var(--sans);background:var(--pn2);color:var(--tx);border:1px solid var(--bd);padding:9px 14px;border-radius:9px;cursor:pointer;transition:.15s}button:hover:not(:disabled){border-color:var(--cy)}button:disabled{opacity:.4;cursor:not-allowed}
+button.p{background:var(--cy);color:#04211c;border-color:var(--cy)}button.t.on{border-color:var(--cy);color:var(--cy)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12.5px}.kv:last-child{border:0}.kv span{color:var(--dm)}.kv b{font:600 11.5px var(--mono);text-align:right}
+.ok{color:var(--gr)}.wn{color:var(--am)}.bad{color:var(--rd)}
+.bar{margin-bottom:10px}.bar>div{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--dm);margin-bottom:4px}.bar b{color:var(--tx)}
+.bar u{display:block;height:6px;background:var(--pn2);border-radius:4px;overflow:hidden}.bar s{display:block;height:100%;background:var(--cy);border-radius:4px;transition:width .8s}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mc{background:var(--pn2);border-radius:10px;padding:10px 12px}.mc small{font:10px var(--mono);color:var(--dm);text-transform:uppercase}.mc div{font-size:22px;font-weight:700}.mc em{font:10px var(--mono);color:var(--dm);font-style:normal;display:block}
+.gw{display:flex;gap:18px;align-items:center}.gauge{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;flex:none}.gauge div{width:80px;height:80px;border-radius:50%;background:var(--pn);display:grid;place-items:center;text-align:center;font-weight:700;font-size:20px;line-height:1}.gauge small{display:block;font:8px var(--mono);color:var(--dm);margin-top:3px}
+.badge{display:inline-block;font:600 11px var(--mono);padding:4px 10px;border:1px solid;border-radius:6px;margin:4px 0}
+.sm{font:10.5px/1.5 var(--mono);color:var(--dm);margin-top:10px}table{width:100%;border-collapse:collapse;font:11.5px var(--mono)}td,th{text-align:left;padding:6px 0;border-bottom:1px solid var(--bd)}th{color:var(--dm);font-weight:400;font-size:10px;text-transform:uppercase}
+button:focus-visible,.drop:focus-visible{outline:3px solid #aFAEA2;outline-offset:3px}
+button.p{background:#1B1E4A;color:#fffefa;border-color:#1B1E4A}
+button.p:hover:not(:disabled){background:#30356b}
+.brand b{color:#AFAEA2}
+.card{border-radius:16px}
+@media(max-width:550px){header{padding:12px 14px}.wrap{padding:14px 12px 40px}.stepper{gap:6px}.st{padding:10px}.card{padding:13px}}
+</style></head><body>
+<header><div class="brand">ONCO<b>LENS</b><small>RESEARCH PIPELINE CONSOLE · v4.0 · TWO RESEARCH MODES</small></div><span class="chip" id="chip">READY</span></header>
+<div class="note"><b>Research prototype.</b> This interactive console runs its original <b>synthetic-phantom pipeline in your browser</b>. Its logistic classifier, 5-fold validation, segmentation, and deployment metrics are <b>not results from the OncoLens ResNet18 MRI model</b>. Research demonstration only; not for diagnosis or patient care.</div>
+<div class="wrap"><div class="sm" style="margin:0 0 14px;padding:10px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--pn)"><b>TWO SEPARATE RESEARCH MODES</b> — <b>Run Pipeline:</b> browser-based synthetic-phantom demonstration; its classification and validation figures are not patient-specific. <b>Run ResNet18:</b> connected experimental four-category MRI classifier using /api/predict. Neither mode is intended for clinical diagnosis.</div><div class="stepper" id="stepper"></div>
+<div class="grid"><div class="col">
+<div class="card"><h3>Image viewer <i id="tm">NO INPUT</i></h3>
+<div id="dz" class="drop"><b>Drop de-identified research image</b><span>or click to browse · demonstration pipeline processes grayscale</span></div>
+<div class="view" id="vw" style="display:none"><canvas id="cv" width="128" height="128"></canvas><div class="vt" id="vt">RAW</div></div>
+<div class="row"><button class="t on" data-m="0">Raw</button><button class="t" data-m="1">Preprocessed</button><button class="t" data-m="2">Segmentation</button></div>
+<div class="row"><input type="file" id="fi" accept="image/*" hidden><button id="up">↑ Upload</button><button id="sa">⌁ Synthetic phantom</button>
+<button id="run-ai" class="p" type="button" disabled>
+  Run ResNet18
+</button>
+<button id="run" class="p" disabled>▶ Run pipeline</button><button id="rp" disabled>⬇ Report</button></div>
+<div class="sm" id="info">Phantom scans carry a ground-truth lesion mask, so Dice/IoU are measured for real. Uploaded images have no reference mask.</div></div>
+<div class="card"><h3>Phase 2 · Segmentation <i id="t2">STANDBY</i></h3><div id="b2" class="ph">Awaiting preprocessing…</div></div>
+<div class="card"><h3>Phase 3 · Radiomic features <i id="t3">STANDBY</i></h3><div id="b3" class="ph">Awaiting segmentation…</div></div>
+</div><div class="col">
+<div class="card"><h3>Phase 1 · Preprocessing <i id="t1">STANDBY</i></h3><div id="b1" class="ph">No image loaded.</div></div>
+<div class="card"><h3>Demo Classification · Synthetic Pipeline <i id="tc">STANDBY</i></h3><div id="bc" class="ph">Awaiting features…</div></div>
+<div class="card"><h3>Demo Validation · 200 Synthetic Phantoms (5-fold CV) <i id="t4">STANDBY</i></h3><div id="b4" class="ph">Awaiting classifier…</div></div>
+<div class="card"><h3>Phase 5 · Deployment <i id="t5">STANDBY</i></h3><div id="b5" class="ph">Pipeline not complete.</div></div>
+</div></div></div>
+<script>
+const N=128,$=i=>document.getElementById(i),sleep=ms=>new Promise(r=>setTimeout(r,ms)),sig=x=>1/(1+Math.exp(-x)),cl=(v,a=0,b=1)=>v<a?a:v>b?b:v;
+let sd_=1;const rnd=()=>(sd_=sd_*16807%2147483647,(sd_-1)/2147483646),gs=()=>Math.sqrt(-2*Math.log(rnd()+1e-9))*Math.cos(6.2832*rnd());
+const FN=['Intensity SD','Entropy','GLCM contrast','GLCM homogeneity','GLCM energy','Boundary roughness','Eccentricity','√Area (px)'];
+const PH=[['01','Preprocessing','denoise · normalize'],['02','Segmentation','multi-Otsu · morphology'],['03','Radiomics','first-order · GLCM · shape'],['04','Validation','5-fold CV · subgroups'],['05','Deployment','INT8 · prune · latency']];
+$('stepper').innerHTML=PH.map((p,i)=>`<div class=st id=s${i+1}><small>${p[0]}</small><div>${p[1]}</div><em>${p[2]}</em></div>`).join('');
+const kv=a=>a.map(([k,v,c])=>`<div class=kv><span>${k}</span><b class="${c||''}">${v}</b></div>`).join('');
+const bar=(l,f,t)=>`<div class=bar><div><span>${l}</span><b>${t}</b></div><u><s style="width:${cl(f)*100}%"></s></u></div>`;
+function put(k,h,tag,c){$('b'+k).className='';$('b'+k).innerHTML=h;const t=$('t'+k);t.textContent=tag;t.className=c||''}
+const stp=(i,s)=>$('s'+i).className='st '+s;
+/* ---------- synthetic phantom with ground truth ---------- */
+function phantom(mal,noise,R){const g=new Float32Array(N*N),gt=new Uint8Array(N*N),cx=N/2+gs()*6,cy=N/2+gs()*6,k=[rnd()*6.28,rnd()*6.28,rnd()*6.28],
+ amp=(mal?.08:.02)+rnd()*.18,het=(mal?.07:.02)+rnd()*.12,f1=.5+rnd()*.5,f2=.5+rnd()*.5,l1=rnd()*6,l2=rnd()*6;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x,e=((x-64)/52)**2+((y-64)/58)**2;let v=e<1?.3+.04*Math.sin(x/9+l1)*Math.cos(y/11+l2):0;
+  const dx=x-cx,dy=y-cy,th=Math.atan2(dy,dx),rr=R*(1+amp*(Math.sin(3*th+k[0])+.6*Math.sin(5*th+k[1])+.4*Math.sin(8*th+k[2])));
+  if(Math.hypot(dx,dy)<rr){gt[i]=1;v=.68+het*(Math.sin(x*f1)*Math.cos(y*f2)+.5*gs())}
+  g[i]=cl(v+noise*gs())}return{g,gt}}
+/* ---------- preprocessing ---------- */
+function blur(g){const t=new Float32Array(N*N),o=new Float32Array(N*N),at=(a,x,y)=>a[cl(y,0,N-1)*N+cl(x,0,N-1)];
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++)t[y*N+x]=(at(g,x-1,y)+2*g[y*N+x]+at(g,x+1,y))/4;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++)o[y*N+x]=(at(t,x,y-1)+2*t[y*N+x]+at(t,x,y+1))/4;return o}
+const hf=g=>{const b=blur(g);let s=0,s2=0;for(let i=0;i<g.length;i++){const d=g[i]-b[i];s+=d;s2+=d*d}const n=g.length;return Math.sqrt(s2/n-(s/n)**2)};
+function prep(g0){const b=blur(blur(g0)),s=Float32Array.from(b).sort(),p1=s[N*N*.01|0],p9=s[N*N*.99|0],g=b.map(v=>cl((v-p1)/Math.max(p9-p1,1e-6)));return{g,p1,p9,n0:hf(g0),n1:hf(b)}}
+/* ---------- segmentation: multi-Otsu + opening + largest interior component ---------- */
+function otsu(v){const H=new Float64Array(64);let n=0,sum=0;for(const x of v){H[Math.min(63,x*64|0)]++;n++}for(let i=0;i<64;i++)sum+=i*H[i];let wB=0,sB=0,best=-1,t=0;
+ for(let i=0;i<64;i++){wB+=H[i];const wF=n-wB;if(!wB||!wF)continue;sB+=i*H[i];const d=sB/wB-(sum-sB)/wF,s=wB*wF*d*d;if(s>best){best=s;t=i}}return(t+1)/64}
+function morph(m,dil){const o=new Uint8Array(N*N);for(let y=0;y<N;y++)for(let x=0;x<N;x++){let a=dil?0:1;for(let j=-1;j<2;j++)for(let i=-1;i<2;i++){const X=x+i,Y=y+j,v=X>=0&&X<N&&Y>=0&&Y<N?m[Y*N+X]:0;if(dil?v:!v){a=dil?1:0}}o[y*N+x]=a}return o}
+function segment(g){const t1=otsu(g),up=[];for(const x of g)if(x>t1)up.push(x);if(up.length<60)return null;const t2=otsu(up);
+ let m=morph(morph(Uint8Array.from(g,x=>x>t2?1:0),0),1);const lab=new Int32Array(N*N);let best=null,ba=0;
+ for(let s=0;s<N*N;s++){if(!m[s]||lab[s])continue;const st=[s],px=[];lab[s]=1;let bd=false;while(st.length){const p=st.pop();px.push(p);const x=p%N,y=p/N|0;if(!x||!y||x==N-1||y==N-1)bd=true;
+  for(const q of[x>0?p-1:-1,x<N-1?p+1:-1,y>0?p-N:-1,y<N-1?p+N:-1])if(q>=0&&m[q]&&!lab[q]){lab[q]=1;st.push(q)}}
+  if(!bd&&px.length>ba){ba=px.length;best=px}}
+ if(!best||ba<30)return null;const o=new Uint8Array(N*N);for(const p of best)o[p]=1;return o}
+const dice=(a,b)=>{let i=0,x=0,y=0;for(let k=0;k<a.length;k++){i+=a[k]&b[k];x+=a[k];y+=b[k]}return{d:2*i/(x+y||1),j:i/(x+y-i||1)}};
+const edge=(m,i)=>{const x=i%N,y=i/N|0;return m[i]&&!(x>0&&m[i-1]&&x<N-1&&m[i+1]&&y>0&&m[i-N]&&y<N-1&&m[i+N])};
+/* ---------- radiomics ---------- */
+function feats(g,m){const ix=[];for(let i=0;i<m.length;i++)if(m[i])ix.push(i);const A=ix.length;let s=0,s2=0;for(const i of ix){s+=g[i];s2+=g[i]*g[i]}const mu=s/A,sd=Math.sqrt(Math.max(0,s2/A-mu*mu)),q=i=>Math.min(15,g[i]*16|0),h=new Float64Array(16);
+ for(const i of ix)h[q(i)]++;let en=0;for(const c of h)if(c){const p=c/A;en-=p*Math.log2(p)}
+ const C=new Float64Array(256);let n=0;for(const i of ix){const x=i%N,y=i/N|0;for(const[dx,dy]of[[1,0],[0,1],[1,1],[1,-1]]){const X=x+dx,Y=y+dy;if(X<0||X>=N||Y<0||Y>=N)continue;const j=Y*N+X;if(!m[j])continue;C[q(i)*16+q(j)]++;C[q(j)*16+q(i)]++;n+=2}}
+ let con=0,hom=0,eg=0;if(n)for(let a=0;a<16;a++)for(let b=0;b<16;b++){const p=C[a*16+b]/n;con+=p*(a-b)**2;hom+=p/(1+Math.abs(a-b));eg+=p*p}
+ let P=0,sx=0,sy=0;for(const i of ix){sx+=i%N;sy+=i/N|0;if(edge(m,i))P++}const cx=sx/A,cy=sy/A;let m20=0,m11=0,m02=0;for(const i of ix){const dx=i%N-cx,dy=(i/N|0)-cy;m20+=dx*dx;m11+=dx*dy;m02+=dy*dy}
+ m20/=A;m11/=A;m02/=A;const r=Math.sqrt((m20-m02)**2/4+m11*m11),l1=(m20+m02)/2+r,l2=(m20+m02)/2-r;
+ return[sd,en,con,hom,eg,P/(2*Math.sqrt(Math.PI*A)),Math.sqrt(Math.max(0,1-l2/l1)),Math.sqrt(A)]}
+const pipe=g0=>{const pre=prep(g0),mask=segment(pre.g);return{pre,mask,F:mask?feats(pre.g,mask):null}};
+/* ---------- classifier: L2 logistic regression ---------- */
+function fit(X,y){const d=X[0].length,mu=[],sd=[];for(let j=0;j<d;j++){const c=X.map(r=>r[j]),m=c.reduce((a,b)=>a+b)/c.length;mu.push(m);sd.push(Math.sqrt(c.reduce((a,b)=>a+(b-m)**2,0)/c.length)||1)}
+ const Z=X.map(r=>r.map((v,j)=>(v-mu[j])/sd[j])),w=Array(d).fill(0);let b=0;
+ for(let it=0;it<500;it++){const gw=Array(d).fill(0);let gb=0;Z.forEach((z,i)=>{const p=sig(b+z.reduce((s,v,j)=>s+v*w[j],0))-y[i];gb+=p;z.forEach((v,j)=>gw[j]+=p*v)});for(let j=0;j<d;j++)w[j]-=.5*(gw[j]/Z.length+.01*w[j]);b-=.5*gb/Z.length}
+ return{w,b,mu,sd}}
+const prob=(M,x,w=M.w)=>sig(M.b+x.reduce((s,v,j)=>s+(v-M.mu[j])/M.sd[j]*w[j],0));
+function auc(p,y){let s=0,n=0;for(let i=0;i<p.length;i++)if(y[i])for(let j=0;j<p.length;j++)if(!y[j]){n++;s+=p[i]>p[j]?1:p[i]==p[j]?.5:0}return s/n}
+function conf(p,y,t=.5){let tp=0,tn=0,fp=0,fn=0;p.forEach((v,i)=>{const c=v>=t;y[i]?c?tp++:fn++:c?fp++:tn++});const se=tp/(tp+fn||1),sp=tn/(tn+fp||1),pr=tp/(tp+fp||1);return{se,sp,f1:2*pr*se/(pr+se||1),acc:(tp+tn)/p.length}}
+let REF=null;
+async function buildRef(){if(REF)return REF;sd_=2024;const n=200,D=[];
+ for(let i=0;i<n;i++){const y=i%2,noise=rnd()<.5?.03:.08,R=8+rnd()*16,gen=phantom(y,noise,R),r=pipe(gen.g);
+  D.push({y,F:r.F||Array(8).fill(0),dc:r.mask?dice(r.mask,gen.gt):{d:0,j:0},sc:noise<.05?'Scanner A (σ=.03)':'Scanner B (σ=.08)',sz:R<16?'Small lesion (R<16px)':'Large lesion (R≥16px)'});
+  if(i%10==9){$('chip').textContent=`TRAINING REF ${i+1}/${n}`;await sleep(0)}}
+ const fold=Array(n),idx=[0,1].map(c=>D.map((d,i)=>i).filter(i=>D[i].y==c).sort(()=>rnd()-.5));idx.forEach(a=>a.forEach((i,k)=>fold[i]=k%5));
+ const oof=Array(n),fa=[];for(let f=0;f<5;f++){const tr=D.filter((d,i)=>fold[i]!=f),M=fit(tr.map(d=>d.F),tr.map(d=>d.y)),te=D.map((d,i)=>i).filter(i=>fold[i]==f);te.forEach(i=>oof[i]=prob(M,D[i].F));fa.push(auc(te.map(i=>oof[i]),te.map(i=>D[i].y)))}
+ const y=D.map(d=>d.y),M=fit(D.map(d=>d.F),y);REF={D,y,oof,fa,M,A:auc(oof,y),c:conf(oof,y),ds:D.map(d=>d.dc.d),jj:D.map(d=>d.dc.j)};$('chip').textContent='READY';return REF}
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length,sdv=a=>{const m=mean(a);return Math.sqrt(mean(a.map(v=>(v-m)**2)))};
+/* ---------- UI state ---------- */
+const S={raw:null,gt:null,pre:null,mask:null,mode:0,rep:null,up:false},cv=$('cv'),cx=cv.getContext('2d');
+function draw(){if(!S.raw)return;const im=cx.createImageData(N,N),g=S.mode&&S.pre?S.pre.g:S.raw;for(let i=0;i<N*N;i++){let r=g[i]*255,gg=r,b=r;
+ if(S.mode==2&&S.mask){if(S.mask[i]){r=r*.7+255*.3}if(edge(S.mask,i)){r=63;gg=224;b=197}else if(S.gt&&edge(S.gt,i)){r=255;gg=180;b=84}}
+ im.data.set([r,gg,b,255],i*4)}cx.putImageData(im,0,0);$('vt').textContent=['RAW INPUT','PREPROCESSED','SEGMENTATION · cyan=pred'+(S.gt?' · amber=truth':'')][S.mode]}
+document.querySelectorAll('.t').forEach(b=>b.onclick=()=>{S.mode=+b.dataset.m;document.querySelectorAll('.t').forEach(x=>x.classList.toggle('on',x==b));draw()});
+function ready(name,gt){S.up=!gt;S.gt=gt;S.pre=S.mask=null;$('dz').style.display='none';$('vw').style.display='block';$('run').disabled=false;$('tm').textContent=name;S.mode=0;draw();
+ for(const k of[1,2,3,'c',4,5]){put(k,'Awaiting run…','STANDBY');$('b'+k).className='ph'}for(let i=1;i<6;i++)stp(i,'')}
+function load(f){const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;S.raw=new Float32Array(N*N);
+ for(let i=0;i<N*N;i++)S.raw[i]=(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2])/255;const n=f.name.toLowerCase();ready(n.includes('ct')?'CT':n.includes('histo')||n.includes('wsi')?'HISTOPATHOLOGY':n.includes('mri')||n.includes('brain')?'MRI':'IMAGE',null);$('info').textContent=`${f.name} · resampled to ${N}×${N} grayscale · no reference mask (Dice/IoU not available)`};im.src=URL.createObjectURL(f)}
+$('up').onclick=$('dz').onclick=()=>$('fi').click();$('fi').onchange=e=>e.target.files[0]&&load(e.target.files[0]);
+$('dz').ondragover=e=>{e.preventDefault();$('dz').classList.add('h')};$('dz').ondragleave=()=>$('dz').classList.remove('h');$('dz').ondrop=e=>{e.preventDefault();$('dz').classList.remove('h');e.dataTransfer.files[0]&&load(e.dataTransfer.files[0])};
+$('sa').onclick=()=>{sd_=Math.floor(Math.random()*1e9)+1;const mal=rnd()<.5?1:0,p=phantom(mal,rnd()<.5?.03:.08,8+rnd()*16);S.raw=p.g;S.truth=mal;ready('SYNTHETIC PHANTOM',p.gt);$('info').textContent='Synthetic phantom with ground-truth lesion mask (hidden label: '+(mal?'irregular/heterogeneous generator':'smooth/homogeneous generator')+' — revealed in report).'};
+async function run(){const ids=['run','up','sa','rp'];ids.forEach(i=>$(i).disabled=true);const R={};
+ stp(1,'on');put(1,'Processing…','RUNNING','a');await sleep(350);const pre=S.pre=prep(S.raw);S.mode=1;document.querySelectorAll('.t').forEach(x=>x.classList.toggle('on',x.dataset.m=='1'));draw();
+ R.pre={noise_before:pre.n0,noise_after:pre.n1,p1:pre.p1,p99:pre.p9};
+ put(1,kv([['Denoising','Binomial 3×3, 2 passes (σ≈1.0 px)'],['High-freq noise σ',`${pre.n0.toFixed(4)} → ${pre.n1.toFixed(4)}`,'ok'],['Normalization',`Percentile clip [${pre.p1.toFixed(3)}, ${pre.p9.toFixed(3)}] → [0,1]`],['Registration','Not applied — needs a reference atlas','wn'],['Augmentation','Training-time only (not at inference)']]),'COMPLETE','g');stp(1,'ok');
+ stp(2,'on');put(2,'Segmenting…','RUNNING','a');await sleep(400);const mask=S.mask=segment(pre.g);S.mode=2;document.querySelectorAll('.t').forEach(x=>x.classList.toggle('on',x.dataset.m=='2'));draw();
+ if(!mask){put(2,kv([['Result','No interior ROI found','bad']]),'FAILED','r');stp(2,'');S.rep=R;['run','up','sa'].forEach(i=>$(i).disabled=false);return}
+ let a=0;for(const v of mask)a+=v;const fr=a/N/N,ds=S.gt?dice(mask,S.gt):null;R.seg={area_px:a,frame_fraction:fr,dice:ds&&ds.d,iou:ds&&ds.j};const gate=ds?ds.d>=.85:fr>.002&&fr<.4;
+ put(2,kv([['Method','Multi-Otsu + opening + largest interior component'],['ROI area',`${a} px (${(fr*100).toFixed(2)}% of frame)`]])+(ds?bar('Dice (vs ground truth)',ds.d,1,ds.d.toFixed(3))+bar('IoU (vs ground truth)',ds.j,1,ds.j.toFixed(3)):'<div class=sm>Dice/IoU need a reference mask — none for uploaded images.</div>')+kv([[ds?'Quality gate (Dice ≥ 0.85)':'Plausibility gate (0.2–40% of frame)',gate?'PASS':'REVIEW',gate?'ok':'wn']])+'<div class=sm>Trained U-Net / Attention U-Net weights are not bundled; this classical segmenter stands in for Phase 2.</div>',gate?'COMPLETE':'REVIEW',gate?'g':'a');stp(2,'ok');
+ stp(3,'on');put(3,'Extracting…','RUNNING','a');const F=feats(pre.g,mask);await sleep(300);const T=await buildRef(),z=F.map((v,j)=>(v-T.M.mu[j])/T.M.sd[j]);R.features=Object.fromEntries(FN.map((n,j)=>[n,F[j]]));
+ put(3,F.map((v,j)=>bar(FN[j],(cl(z[j],-3,3)+3)/6,`${v.toFixed(3)} · z=${z[j].toFixed(1)}`)).join('')+'<div class=sm>Bars show z-score vs the 200-phantom reference set. Deep (CNN/ViT) branch needs pretrained weights — not included.</div>','COMPLETE','g');stp(3,'ok');
+ const p=prob(T.M,F),col=p<.33?'var(--gr)':p<.66?'var(--am)':'var(--rd)',gr=p<.33?'Low demo score':p<.66?'Midrange demo score':'High synthetic-demo score';R.classification={malignancy_score:p,confidence:Math.max(p,1-p),label:gr,truth:S.truth};
+ put('c',`<div class=gw><div class=gauge style="background:conic-gradient(${col} ${p*360}deg,var(--pn2) 0)"><div><span>${(p*100).toFixed(0)}%<small>SCORE</small></span></div></div><div><span class=badge style="color:${col};border-color:${col}">${gr}</span><div class=sm style="margin:0">Phantom-model score ${(Math.max(p,1-p)*100).toFixed(0)}% · logistic regression on ${F.length} radiomic features.${S.up?' <b class=wn>Uploaded image is outside the phantom training domain — treat as illustrative only.</b>':''}</div></div></div>`,'COMPLETE','g');await sleep(350);
+ stp(4,'on');put(4,'Validating…','RUNNING','a');await sleep(300);const c=T.c,ok=(v,t)=>v>=t?'ok':'bad',groups=k=>[...new Set(T.D.map(d=>d[k]))].sort().map(g=>{const ix=T.D.map((d,i)=>i).filter(i=>T.D[i][k]==g);return[g,conf(ix.map(i=>T.oof[i]),ix.map(i=>T.y[i])).acc,ix.length]});
+ const sg=[...groups('sc'),...groups('sz')];R.validation={sensitivity:c.se,specificity:c.sp,auc:T.A,f1:c.f1,fold_auc:T.fa,seg_dice_mean:mean(T.ds),subgroups:Object.fromEntries(sg.map(s=>[s[0],s[1]]))};
+ put(4,`<div class=mg><div class=mc><small>Sensitivity</small><div class=${ok(c.se,.9)}>${(c.se*100).toFixed(1)}%</div><em>target ≥90%</em></div><div class=mc><small>Specificity</small><div class=${ok(c.sp,.85)}>${(c.sp*100).toFixed(1)}%</div><em>target ≥85%</em></div><div class=mc><small>AUC-ROC</small><div class=${ok(T.A,.9)}>${T.A.toFixed(3)}</div><em>target ≥0.90</em></div><div class=mc><small>F1-score</small><div class=${ok(c.f1,.88)}>${c.f1.toFixed(3)}</div><em>target ≥0.88</em></div></div>
+ <div class=sm>Out-of-fold predictions, 200 phantoms (100/100), stratified 5-fold. Fold AUC: ${T.fa.map(v=>v.toFixed(2)).join(' · ')} (mean ${mean(T.fa).toFixed(3)} ± ${sdv(T.fa).toFixed(3)}). Segmenter Dice on phantoms: ${mean(T.ds).toFixed(3)} ± ${sdv(T.ds).toFixed(3)}.</div><canvas id=roc width=300 height=150 style="margin:10px 0;border-radius:8px;background:var(--pn2)"></canvas>
+ <table><tr><th>Subgroup</th><th>n</th><th>Accuracy</th></tr>${sg.map(s=>`<tr><td>${s[0]}</td><td>${s[2]}</td><td>${(s[1]*100).toFixed(1)}%</td></tr>`).join('')}</table>`,'COMPLETE','g');
+ const rc=$('roc').getContext('2d'),th=[...new Set(T.oof)].sort((a,b)=>b-a),pts=[[0,0],...th.map(t=>{const k=conf(T.oof,T.y,t);return[1-k.sp,k.se]}),[1,1]],cs=getComputedStyle(document.body);rc.strokeStyle=cs.getPropertyValue('--bd');rc.beginPath();rc.moveTo(10,140);rc.lineTo(290,10);rc.stroke();
+ rc.strokeStyle=cs.getPropertyValue('--cy').trim();rc.lineWidth=2;rc.beginPath();pts.forEach(([x,y],i)=>i?rc.lineTo(10+x*280,140-y*130):rc.moveTo(10,140));rc.stroke();rc.fillStyle=cs.getPropertyValue('--dm');rc.font='10px monospace';rc.fillText('ROC (FPR →, TPR ↑)',14,22);stp(4,'ok');await sleep(300);
+ stp(5,'on');put(5,'Packaging…','RUNNING','a');await sleep(300);const M=T.M,sc=Math.max(...M.w.map(Math.abs))/127,wq=M.w.map(w=>Math.round(w/sc)*sc),ord=M.w.map((w,i)=>[Math.abs(w),i]).sort((a,b)=>a[0]-b[0]),wp=M.w.slice();ord.slice(0,2).forEach(o=>wp[o[1]]=0);
+ const pf=T.D.map(d=>prob(M,d.F)),pq=T.D.map(d=>prob(M,d.F,wq)),pp=T.D.map(d=>prob(M,d.F,wp)),a0=auc(pf,T.y),agree=mean(pf.map((v,i)=>(v>=.5)==(pq[i]>=.5)?1:0));
+ const t0=performance.now();for(let i=0;i<20;i++){const r=pipe(S.raw);prob(M,r.F||Array(8).fill(0))}const ms=(performance.now()-t0)/20;R.deployment={int8_auc_delta:auc(pq,T.y)-a0,int8_agreement:agree,pruned_auc_delta:auc(pp,T.y)-a0,latency_ms:ms};
+ put(5,kv([['INT8 quantization',`weights/${(sc).toExponential(1)} · decision agreement ${(agree*100).toFixed(1)}%`,'ok'],['ΔAUC after INT8',(auc(pq,T.y)-a0).toFixed(4)],['Pruning (25% smallest |w|)',`2 of 8 weights zeroed · ΔAUC ${(auc(pp,T.y)-a0).toFixed(4)}`],['Classifier size',`${(M.w.length+1)*4} B FP32 → ${M.w.length+4} B INT8`],['Measured latency',`${ms.toFixed(1)} ms / image (full pipeline, this device)`,'ok']])+'<div class=sm>Deltas computed on the 200-phantom training set (no retraining after pruning). Demonstration report only; not a clinical assessment.</div>','COMPLETE','g');stp(5,'ok');
+ S.rep=R;['run','up','sa','rp'].forEach(i=>$(i).disabled=false)}
+$('run').onclick=run;
+$('rp').onclick=()=>{const r={generated:new Date().toISOString(),disclaimer:'OncoLens synthetic-phantom demo; not ResNet18 inference or clinical validation; not for diagnostic use.',input:$('tm').textContent,...S.rep},a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(r,null,2)],{type:'application/json'}));a.download='oncolens_phantom_demo_report.json';a.click()};
+</script>
+<section id="oncolens-ai-panel"
+  style="margin:18px 0;padding:20px;
+  border:1px solid #AFAEA2;border-radius:14px;
+  background:#1B1E4A;color:#fff;
+  font-family:'CMU Serif','Latin Modern Roman',Georgia,serif">
+
+  <h3 style="margin-top:0;color:#fff">
+    OncoLens · ResNet18 Research Classification
+  </h3>
+
+  <p id="ai-status">STATUS: STANDBY</p>
+
+  <div id="ai-results">
+    Upload a de-identified brain MRI image,
+    then click Run ResNet18.
+  </div>
+
+  <p style="font-size:12px;color:#d7d6ce">
+    Research-only experimental model.
+    Scores are uncalibrated softmax outputs,
+    not medical probabilities.
+    Not for clinical diagnosis.
+  </p>
+</section>
+
+
+<script>
+(() => {
+  "use strict";
+
+  const upload = document.getElementById("fi");
+  const button = document.getElementById("run-ai");
+  const results = document.getElementById("ai-results");
+  const status = document.getElementById("ai-status");
+
+  if (!upload || !button || !results || !status) {
+    console.error("OncoLens AI controls missing");
+    return;
+  }
+
+  const names = [
+    "glioma", "meningioma", "notumor", "pituitary"
+  ];
+
+  function resetAI() {
+    button.disabled = !(upload.files && upload.files.length);
+    status.textContent = "STATUS: STANDBY";
+    results.textContent = "Ready for research MRI classification.";
+  }
+
+  upload.addEventListener("change", resetAI);
+
+  button.addEventListener("click", async () => {
+    const file = upload.files && upload.files[0];
+
+    if (!file) {
+      results.textContent = "Upload a brain MRI image first.";
+      return;
+    }
+
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      results.textContent = "Only PNG and JPEG are supported.";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      results.textContent = "Image must be 10 MB or smaller.";
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = "STATUS: RUNNING";
+    results.textContent = "Running ResNet18 inference...";
+
+    try {
+      const form = new FormData();
+      form.append("file", file);
+
+      const response = await fetch("/api/predict", {
+        method: "POST",
+        body: form
+      });
+
+      if (!response.ok) {
+        throw new Error("API error " + response.status);
+      }
+
+      const data = await response.json();
+
+      if (
+        !names.includes(data.predicted_class) ||
+        !data.scores ||
+        !names.every(n =>
+          Number.isFinite(Number(data.scores[n]))
+        )
+      ) {
+        throw new Error("Invalid prediction response");
+      }
+
+      results.replaceChildren();
+
+      const heading = document.createElement("h3");
+      heading.style.cssText =
+        "color:#fff;margin:12px 0;font-size:22px";
+
+      const categoryLabels = {
+        glioma: "Glioma pattern",
+        meningioma: "Meningioma pattern",
+        notumor: "No-tumor category",
+        pituitary: "Pituitary pattern"
+      };
+
+      heading.textContent =
+        "Predicted training category: " +
+        categoryLabels[data.predicted_class];
+
+      results.appendChild(heading);
+
+      const explanation = document.createElement("p");
+      explanation.style.cssText =
+        "color:#e1dfd6;font-size:13px;line-height:1.6";
+
+      explanation.textContent =
+        data.predicted_class === "notumor"
+          ? "The model selected its no-tumor training category. This does not rule out a tumor."
+          : "The model selected a tumor-related training category. This does not establish the presence of a tumor.";
+
+      results.appendChild(explanation);
+
+      const scoreTitle = document.createElement("p");
+      scoreTitle.textContent = "Experimental ResNet18 scores (uncalibrated)";
+      scoreTitle.style.cssText =
+        "font-weight:bold;margin:20px 0 12px";
+
+      results.appendChild(scoreTitle);
+
+      names.forEach(name => {
+        const score = Number(data.scores[name]);
+        const percent = score * 100;
+
+        const container = document.createElement("div");
+        container.style.margin = "12px 0";
+
+        const label = document.createElement("div");
+        label.style.cssText =
+          "display:flex;justify-content:space-between;" +
+          "gap:12px;font-size:13px;margin-bottom:6px";
+
+        const className = document.createElement("span");
+        className.textContent = categoryLabels[name];
+
+        const value = document.createElement("span");
+        value.textContent = percent.toFixed(2) + "%";
+
+        label.append(className, value);
+
+        const track = document.createElement("div");
+        track.style.cssText =
+          "height:10px;background:#45486b;" +
+          "border-radius:8px;overflow:hidden";
+
+        const fill = document.createElement("div");
+        fill.style.cssText =
+          "height:100%;border-radius:8px;" +
+          "background:" +
+          (name === data.predicted_class
+            ? "#62c6c2"
+            : "#AFAEA2") +
+          ";width:" + Math.max(0, Math.min(100, percent)) + "%";
+
+        track.appendChild(fill);
+        container.append(label, track);
+        results.appendChild(container);
+      });
+
+      const disclaimer = document.createElement("p");
+      disclaimer.style.cssText =
+        "font-size:12px;color:#e1dfd6;" +
+        "line-height:1.6;margin-top:18px";
+
+      disclaimer.textContent =
+        "RESEARCH ONLY — Scores are uncalibrated model " +
+        "outputs, not clinical probabilities. " +
+        "This tool is not validated for medical diagnosis.";
+
+      results.appendChild(disclaimer);
+
+      status.textContent = "STATUS: COMPLETE";
+
+    } catch (error) {
+      status.textContent = "STATUS: ERROR";
+      results.textContent =
+        "Could not connect to the ResNet18 backend.";
+      console.error(error);
+
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // Ensure a new AI run is required after selecting a phantom.
+  const phantom = document.getElementById("sa");
+
+  if (phantom) {
+    phantom.addEventListener("click", () => {
+      button.disabled = true;
+      status.textContent = "STATUS: STANDBY";
+      results.textContent =
+        "Synthetic phantoms use the demonstration pipeline.";
+    });
+  }
+})();
+</script>
+
+
+
+<!-- ONCOLENS INTEGRATED MRI PANEL -->
+<section id="oncolens-integrated-panel"
+ style="
+ position:relative;
+ max-width:1100px;
+ margin:35px auto;
+ padding:28px;
+ border-radius:20px;
+ background:#0d1726;
+ color:#eaf3ff;
+ font-family:Arial,sans-serif;
+ box-shadow:0 12px 36px rgba(0,0,0,.3);
+ z-index:10;
+ ">
+
+ <h2 style="margin-top:0;color:#63e6be">
+   OncoLens — Live MRI Research Analysis
+ </h2>
+
+ <p style="color:#b7c9da;line-height:1.6">
+   Upload de-identified 2D MRI research images
+   to run the original ResNet18 model.
+   Results are for technical research only,
+   not medical diagnosis.
+ </p>
+
+ <input
+   id="oncolens-mri-upload"
+   type="file"
+   accept=".png,.jpg,.jpeg,.bmp,.webp"
+   multiple
+   style="
+   display:block;
+   width:100%;
+   padding:15px;
+   background:#15243a;
+   color:white;
+   border:1px dashed #63e6be;
+   border-radius:12px;
+   box-sizing:border-box;
+   "
+ />
+
+ <button
+   id="oncolens-analyze-button"
+   type="button"
+   style="
+   margin-top:18px;
+   background:#27c9a3;
+   color:#07131c;
+   padding:13px 26px;
+   border:0;
+   border-radius:10px;
+   font-weight:bold;
+   cursor:pointer;
+   ">
+   Analyze MRI Images
+ </button>
+
+ <p id="oncolens-status"
+    role="status"
+    aria-live="polite"
+    style="margin-top:16px;color:#a6c8e4">
+   Waiting for MRI images.
+ </p>
+
+ <div
+   id="oncolens-results"
+   style="
+   display:grid;
+   grid-template-columns:
+     repeat(auto-fit,minmax(270px,1fr));
+   gap:18px;
+   margin-top:22px;
+   ">
+ </div>
+
+ <p style="
+   font-size:12px;
+   color:#a6b6c9;
+   margin-top:24px;
+   ">
+   Research-only software. Softmax scores are
+   not calibrated clinical probabilities.
+   Do not use for diagnosis or treatment.
+ </p>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  const upload = document.getElementById(
+    "oncolens-mri-upload"
+  );
+
+  const button = document.getElementById(
+    "oncolens-analyze-button"
+  );
+
+  const status = document.getElementById(
+    "oncolens-status"
+  );
+
+  const results = document.getElementById(
+    "oncolens-results"
+  );
+
+  const classes = [
+    "glioma",
+    "meningioma",
+    "notumor",
+    "pituitary"
+  ];
+
+  const maxFiles = 20;
+
+  function makeElement(tag, text) {
+    const el = document.createElement(tag);
+    if (text !== undefined) {
+      el.textContent = text;
+    }
+    return el;
+  }
+
+  function addResult(file, prediction, error) {
+    const card = makeElement("div");
+
+    card.style.cssText = `
+      background:#14263a;
+      border:1px solid #29465d;
+      border-radius:14px;
+      padding:16px;
+      min-width:0;
+    `;
+
+    const title = makeElement(
+      "h3",
+      file.name
+    );
+
+    title.style.cssText = `
+      overflow-wrap:anywhere;
+      font-size:15px;
+      color:#d8f7ef;
+    `;
+
+    card.appendChild(title);
+
+    if (error) {
+      const err = makeElement(
+        "p",
+        error
+      );
+
+      err.style.color = "#ffaaa8";
+      card.appendChild(err);
+      results.appendChild(card);
+      return;
+    }
+
+    const img = document.createElement("img");
+
+    img.style.cssText = `
+      width:100%;
+      max-height:250px;
+      object-fit:contain;
+      border-radius:10px;
+      background:black;
+    `;
+
+    const objectUrl = URL.createObjectURL(file);
+    img.src = objectUrl;
+
+    img.onload = function () {
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    card.appendChild(img);
+
+    const label = makeElement(
+      "h4",
+      "Predicted class: " +
+      prediction.predicted_class
+    );
+
+    label.style.color = "#63e6be";
+    card.appendChild(label);
+
+    classes.forEach(function (name) {
+      const value = Number(
+        prediction.scores[name] || 0
+      );
+
+      const row = makeElement("div");
+
+      row.style.margin = "12px 0";
+
+      const text = makeElement(
+        "div",
+        name + " — " +
+        (value * 100).toFixed(2) + "%"
+      );
+
+      text.style.fontSize = "13px";
+
+      const track = makeElement("div");
+
+      track.style.cssText = `
+        background:#263b50;
+        height:9px;
+        border-radius:9px;
+        overflow:hidden;
+        margin-top:5px;
+      `;
+
+      const fill = makeElement("div");
+
+      fill.style.cssText = `
+        height:100%;
+        background:#38d9b1;
+        border-radius:9px;
+      `;
+
+      fill.style.width =
+        Math.max(0, Math.min(100, value * 100)) + "%";
+
+      track.appendChild(fill);
+      row.appendChild(text);
+      row.appendChild(track);
+      card.appendChild(row);
+    });
+
+    results.appendChild(card);
+  }
+
+  button.addEventListener(
+    "click",
+    async function () {
+      const files = Array.from(
+        upload.files || []
+      );
+
+      if (files.length === 0) {
+        status.textContent =
+          "Please select at least one MRI image.";
+        return;
+      }
+
+      if (files.length > maxFiles) {
+        status.textContent =
+          "Please select 20 images or fewer.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Analyzing...";
+      results.replaceChildren();
+
+      let successful = 0;
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          status.textContent =
+            "Analyzing image " +
+            (i + 1) + " of " +
+            files.length;
+
+          const form = new FormData();
+          form.append("file", file);
+
+          try {
+            const response = await fetch(
+              "/api/predict",
+              {
+                method: "POST",
+                body: form
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(
+                typeof data.detail === "string"
+                  ? data.detail
+                  : "Prediction request failed."
+              );
+            }
+
+            addResult(file, data, null);
+            successful++;
+
+          } catch (error) {
+            addResult(
+              file,
+              null,
+              String(error.message || error)
+            );
+          }
+        }
+
+        status.textContent =
+          "Finished: " +
+          successful + "/" +
+          files.length +
+          " images analyzed successfully.";
+
+      } finally {
+        button.disabled = false;
+        button.textContent =
+          "Analyze MRI Images";
+      }
+    }
+  );
+})();
+</script>
+<!-- END ONCOLENS INTEGRATED MRI PANEL -->
+
+</body></html>
+
+
+<!-- ONCOLENS LATEX FONT START -->
+
+<style>
+
+/* Load Latin Modern Roman, based on
+   the Computer Modern LaTeX typeface. */
+
+@import url(
+  'https://cdn.jsdelivr.net/npm/latin-modern-web@1.1.0/style/latinmodern-roman.css'
+);
+
+/* Apply to entire dashboard */
+
+html,
+body,
+body *,
+#oncolens-integrated-panel,
+#oncolens-integrated-panel * {
+    font-family:
+        "Latin Modern Roman",
+        "CMU Serif",
+        "Computer Modern",
+        "Times New Roman",
+        serif !important;
+}
+
+/* Headings */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family:
+        "Latin Modern Roman",
+        "CMU Serif",
+        "Computer Modern",
+        serif !important;
+}
+
+/* Buttons and input elements */
+
+button,
+input,
+select,
+textarea,
+label {
+    font-family:
+        "Latin Modern Roman",
+        "CMU Serif",
+        "Computer Modern",
+        serif !important;
+}
+
+/* Preserve existing dashboard styling.
+   This block changes fonts only. */
+
+</style>
+
+<!-- ONCOLENS LATEX FONT END -->
