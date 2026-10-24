@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Use Python 3.11, sufficient disk space for PyTorch, internet for initial installation, and authorized access to the original checkpoint. Requirements retain their original unpinned versions.
+Use Python 3.11, sufficient disk space for PyTorch, internet for initial installation, and authorized access to the original checkpoint. Direct dependencies are pinned to locally tested versions with CPU PyTorch.
 
 ## Setup
 
@@ -65,3 +65,5 @@ The smoke check mocks predictor construction only during the check. It verifies 
 - Unavailable fonts: external font services may be unreachable; local fallback fonts are provided.
 
 Keep the server on localhost. This prototype has no authentication and is not intended as a public inference service. Read [RESEARCH_DISCLAIMER.md](RESEARCH_DISCLAIMER.md).
+
+Deployment branch local startup additionally requires ONCOLENS_USERNAME and ONCOLENS_PASSWORD (20 characters minimum) in the shell environment. See RENDER_DEPLOYMENT.md. The exact original model and preprocessing remain required. The cloud image-dimension limit is 4 million pixels.

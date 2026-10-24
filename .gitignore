@@ -25,3 +25,9 @@ patient_data/
 .pytest_cache/
 .DS_Store
 Thumbs.db
+
+# Private deployment mirror only; never add weights to public source
+models/*.part*
+*.download
+
+runtime-results.json
