@@ -83,7 +83,7 @@ The checkpoint belongs at `models/resnet18_audited_experiment_best.pth` locally.
 
 ## Verification
 
-GitHub Actions installs dependencies, runs `pip check`, compiles Python source, imports the real inference module, and imports the application with only predictor construction mocked. This checks application wiring without weights or patient data. It does not validate checkpoint loading, predictions, or diagnostic performance. Original unpinned requirements are retained; dependency versions may change over time.
+GitHub Actions installs dependencies, runs `pip check`, compiles Python source, imports the real inference module, and imports the application with only predictor construction mocked. This checks application wiring without weights or patient data. It does not validate checkpoint loading, predictions, or diagnostic performance. Direct dependencies are pinned to locally tested Python 3.11 versions with CPU PyTorch. See [Render preparation](RENDER_DEPLOYMENT.md) for deployment blockers and public-access safeguards.
 
 ## Research limitations
 

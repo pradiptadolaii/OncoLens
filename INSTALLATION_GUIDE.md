@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Use Python 3.11, sufficient disk space for PyTorch, internet for initial installation, and authorized access to the original checkpoint. Requirements retain their original unpinned versions.
+Use Python 3.11, sufficient disk space for PyTorch, internet for initial installation, and authorized access to the original checkpoint. Direct dependencies are pinned to locally tested versions with CPU PyTorch.
 
 ## Setup
 
