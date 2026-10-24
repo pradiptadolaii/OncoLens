@@ -99,6 +99,6 @@ See [RESEARCH_DISCLAIMER.md](RESEARCH_DISCLAIMER.md). No model performance metri
 
 ## Author and project context
 
-**Pradipta Dolai** - Biomedical Engineering portfolio - OncoLens research prototype.
+**Pradipta Dolai** - Biomedical Engineering  - OncoLens research prototype.
 
 Application and prediction logic are preserved from the supplied working project. Publication adds documentation and CI. No software or model redistribution license has been inferred or granted by publication.
