@@ -41,7 +41,7 @@ For local use set the same variables in your shell before starting the service. 
 
 ## Verification and remaining cloud gates
 
-Python 3.11.17 CPU dependency installation passed locally. Fourteen security/application tests passed, with predictor construction mocked for resource-independent tests. A separate real Uvicorn process loaded the actual checkpoint, returned dashboard and health 200, returned finite four-class scores for artificial 224x224 and 2000x2000 PNGs, and rejected invalid images (400), oversized files (413), and images beyond the cloud dimension limit (400).
+Python 3.11.17 CPU dependency installation passed locally. Fifteen security/application tests passed, with predictor construction mocked for resource-independent tests. A separate real Uvicorn process loaded the actual checkpoint, returned dashboard and health 200, returned finite four-class scores for artificial 224x224 and 2000x2000 PNGs, and rejected invalid images (400), oversized files (413), and images beyond the cloud dimension limit (400).
 
 Measured local Windows process-tree peak working set was 453.9 MiB including startup and accepted maximum-size synthetic input. This is not a Linux Render measurement and is too close to a 512 MB limit to establish free-instance reliability. A 2 GB proposal leaves headroom. Verify actual Render memory after deployment.
 

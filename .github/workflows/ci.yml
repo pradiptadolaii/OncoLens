@@ -25,3 +25,6 @@ jobs:
         run: python scripts/ci_smoke.py
       - name: Upload security and integrity tests without patient data
         run: python -m pytest -q
+      - name: Private model startup, endpoint and memory checks
+        if: ${{ hashFiles('models/*.part*') != '' }}
+        run: python scripts/runtime_smoke.py

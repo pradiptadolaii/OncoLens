@@ -24,4 +24,4 @@ services:
       - key: ONCOLENS_USERNAME
         value: researcher
       - key: ONCOLENS_PASSWORD
-        sync: false
+        generateValue: true
